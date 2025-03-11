@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "retrofit"
 
 include(":app")
+include(":auth_android:auth_kit")

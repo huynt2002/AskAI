@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -13,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.retrofit"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -31,6 +32,7 @@ android {
         }
         debug {
             buildConfigField("String", "API_KEY", "\"AIzaSyC412ZiWf7JUwQ4fLChYUPri_lkcg9dvWY\"")
+            buildConfigField("String", "WEB_CLIENT_KEY", "\"443846272054-mcv7pg22bbmut0c871vrgohbjpjq24dj.apps.googleusercontent.com\"")
         }
     }
     compileOptions {
@@ -60,6 +62,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(project(":auth_android:auth_kit"))
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

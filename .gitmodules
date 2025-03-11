@@ -1,0 +1,3 @@
+[submodule "auth_android"]
+	path = auth_android
+	url = https://github.com/huynt2002/auth_android.git

@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation
+package com.example.retrofit.presentation.chat_view
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable

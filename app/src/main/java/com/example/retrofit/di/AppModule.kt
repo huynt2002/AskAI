@@ -1,5 +1,8 @@
 package com.example.retrofit.di
 
+import android.content.Context
+import com.example.retrofit.BuildConfig
+import com.example.retrofit.R
 import com.example.retrofit.data.AiAPI
 import com.example.retrofit.data.repository.AiRepository
 import com.example.retrofit.domain.AiRepositoryImp
@@ -7,9 +10,12 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
 import javax.inject.Singleton
+import me.auth_android.auth_kit.data.auth.defines.Authenticating
+import me.auth_android.auth_kit.domain.firebase_auth.FirebaseAuthenticatingImp
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -17,6 +23,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 @InstallIn(SingletonComponent::class)
 abstract class ServiceModule {
     @Binds abstract fun provideAiService(impl: AiRepositoryImp): AiRepository
+
+    @Binds abstract fun provideAuthService(impl: FirebaseAuthenticatingImp): Authenticating
 }
 
 @Module
@@ -32,7 +40,16 @@ object AppModule {
             .create(AiAPI::class.java)
     }
 
+    @Singleton @Provides fun okHttpClient(): OkHttpClient = OkHttpClient()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AuthService{
+    @Singleton @Provides fun webClientId(): String = BuildConfig.WEB_CLIENT_KEY
+
     @Singleton
     @Provides
-    fun okHttpClient(): OkHttpClient = OkHttpClient()
+    fun termAndPolicyLinks(@ApplicationContext context: Context): List<String> =
+        listOf(context.getString(R.string.term_link), context.getString(R.string.policy_link))
 }

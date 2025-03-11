@@ -16,10 +16,10 @@ import kotlin.text.startsWith
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSource
 
 class AiRepositoryImp
@@ -46,7 +46,7 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
                 Request.Builder()
                     .url(url)
                     .addHeader("Content-Type", "application/json")
-                    .post(RequestBody.create(MediaType.get("application/json"), body))
+                    .post(body.toRequestBody("application/json".toMediaType()))
                     .build()
 
             okHttpClient.newCall(request).execute().use { response ->
@@ -54,7 +54,7 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
                     throw IOException("$response")
                 }
 
-                val source: BufferedSource = response.body()?.source() ?: return@use
+                val source: BufferedSource = response.body?.source() ?: return@use
 
                 while (!source.exhausted()) {
                     val line = source.readUtf8Line()?.trim() ?: continue

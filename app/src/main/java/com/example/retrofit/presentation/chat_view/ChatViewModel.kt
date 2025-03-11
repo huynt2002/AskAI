@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation
+package com.example.retrofit.presentation.chat_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.collections.plus
 
 @HiltViewModel
-class ViewModel @Inject constructor(private val aiRepository: AiRepository) : ViewModel() {
+class ChatViewModel @Inject constructor(private val aiRepository: AiRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState())
     val uiState = _uiState.asStateFlow()
 
