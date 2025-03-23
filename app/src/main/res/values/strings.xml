@@ -3,4 +3,5 @@
     <string name="send_button">Send</string>
     <string name="term_link">https://policies.google.com/terms</string>
     <string name="policy_link">https://policies.google.com/privacy</string>
+    <string name="setting_label">Setting</string>
 </resources>

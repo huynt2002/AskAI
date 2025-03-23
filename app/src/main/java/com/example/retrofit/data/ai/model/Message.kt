@@ -1,6 +1,6 @@
-package com.example.retrofit.data.model
+package com.example.retrofit.data.ai.model
 
-import com.example.retrofit.presentation.chat_view.MessageUI
+import com.example.retrofit.presentation.model.MessageUI
 import com.google.gson.annotations.SerializedName
 
 data class RequestBody(val contents: List<Content>)
@@ -41,6 +41,10 @@ data class Message(val content: String, val isUser: Role)
 
 fun Message.toMessageUI(): MessageUI {
     return MessageUI(content = this.content.trim(), isUser = this.isUser == Role.USER)
+}
+
+fun Message.toContent(): Content {
+    return Content(role = this.isUser.id, listOf(Part(text = this.content)))
 }
 
 fun Message.toRequestBody(): RequestBody {

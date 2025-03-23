@@ -1,22 +1,58 @@
 package com.example.retrofit.presentation.chat_view
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.retrofit.data.model.toMessageUI
-import com.example.retrofit.data.repository.AiRepository
+import com.example.retrofit.data.ai.AiRepository
+import com.example.retrofit.data.ai.model.Role
+import com.example.retrofit.data.ai.model.toMessageUI
+import com.example.retrofit.data.local_database.dao.ConversationDao
+import com.example.retrofit.data.local_database.dao.MessageDao
+import com.example.retrofit.data.local_database.model.ConversationEntity
+import com.example.retrofit.data.local_database.model.MessageEntity
+import com.example.retrofit.data.local_database.model.toMessageUI
+import com.example.retrofit.presentation.model.ConversationUI
+import com.example.retrofit.presentation.model.MessageUI
+import com.example.retrofit.presentation.model.toMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import javax.inject.Inject
+import kotlin.collections.plus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.plus
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val aiRepository: AiRepository) : ViewModel() {
+class ChatViewModel
+@Inject
+constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val aiRepository: AiRepository,
+    private val messageDao: MessageDao,
+    private val conversationDao: ConversationDao,
+) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState())
-    val uiState = _uiState.asStateFlow()
+    private var id = savedStateHandle["conversationId"] ?: ""
+    val uiState =
+        _uiState
+            .onStart {
+                if (id.isNotBlank()) {
+                    val list: List<MessageUI> =
+                        messageDao.getMessagesInConversation(id).map { it.toMessageUI() }
+                    _uiState.update { state ->
+                        state.copy(conversationUI = state.conversationUI.copy(listMessage = list))
+                    }
+                }
+            }
+            .stateIn(
+                viewModelScope,
+                initialValue = ViewState(),
+                started = SharingStarted.WhileSubscribed(5000L),
+            )
 
     fun onTextChange(text: String) {
         _uiState.update { it.copy(text = text) }
@@ -26,19 +62,69 @@ class ChatViewModel @Inject constructor(private val aiRepository: AiRepository) 
         if (_uiState.value.text.trim().isBlank()) {
             return
         }
+
         val sendMessage = MessageUI(content = _uiState.value.text.trim(), isUser = true)
-        _uiState.update { it.copy(list = it.list + sendMessage) }
+        _uiState.update {
+            it.copy(
+                conversationUI =
+                    ConversationUI(
+                        it.conversationUI.id,
+                        it.conversationUI.title,
+                        it.conversationUI.listMessage + sendMessage,
+                    )
+            )
+        }
+        addMessage(sendMessage)
         onTextChange("")
         _uiState.update { it.copy(isAiGenerating = true) }
         viewModelScope.launch(Dispatchers.IO) {
+            // val message = aiRepository.getReply(sendMessage.toMessage()) //oneLine
+            val message =
+                aiRepository.getReply(
+                    _uiState.value.conversationUI.listMessage.map { it.toMessage() }
+                )
+            val messageUI = message.toMessageUI()
+            _uiState.update {
+                it.copy(
+                    conversationUI =
+                        ConversationUI(
+                            it.conversationUI.id,
+                            it.conversationUI.title,
+                            it.conversationUI.listMessage + messageUI,
+                        )
+                )
+            }
 
-             val message = aiRepository.getReply(sendMessage.toMessage())
-             _uiState.update { it.copy(list = it.list + message.toMessageUI()) }
-
-//            aiRepository.getStreamReply(sendMessage.toMessage()).collect { message ->
-//                _uiState.update { it.copy(list = it.list + message.toMessageUI()) }
-//            }
+            //            aiRepository.getStreamReply(sendMessage.toMessage()).collect { message ->
+            //                _uiState.update { it.copy(
+            //                    conversationUI =
+            //                        ConversationUI(
+            //                            it.conversationUI.id,
+            //                            it.conversationUI.title,
+            //                            it.conversationUI.listMessage + message.toMessageUI(),
+            //                        )
+            //                ) }
+            //            }
+            addMessage(messageUI = messageUI)
             _uiState.update { it.copy(isAiGenerating = false) }
+        }
+    }
+
+    fun addMessage(messageUI: MessageUI) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (id.isBlank()) {
+                id = UUID.randomUUID().toString()
+                val title = aiRepository.getConversationTitle(messageUI.content)
+                conversationDao.addNewConversation(ConversationEntity(id = id, title = title))
+            }
+            val messageEntity =
+                MessageEntity(
+                    content = messageUI.content,
+                    role = (if (messageUI.isUser) Role.USER else Role.MODEL).id,
+                    id = UUID.randomUUID().toString(),
+                    conversationId = id,
+                )
+            messageDao.insertMessage(messageEntity)
         }
     }
 }

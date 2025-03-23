@@ -1,13 +1,15 @@
-package com.example.retrofit.domain
+package com.example.retrofit.domain.impl.ai
 
 import com.example.retrofit.BuildConfig
-import com.example.retrofit.data.AiAPI
-import com.example.retrofit.data.model.Message
-import com.example.retrofit.data.model.ResponseBody
-import com.example.retrofit.data.model.Role
-import com.example.retrofit.data.model.toMessage
-import com.example.retrofit.data.model.toRequestBody
-import com.example.retrofit.data.repository.AiRepository
+import com.example.retrofit.data.ai.AiAPI
+import com.example.retrofit.data.ai.AiRepository
+import com.example.retrofit.data.ai.model.Message
+import com.example.retrofit.data.ai.model.RequestBody
+import com.example.retrofit.data.ai.model.ResponseBody
+import com.example.retrofit.data.ai.model.Role
+import com.example.retrofit.data.ai.model.toContent
+import com.example.retrofit.data.ai.model.toMessage
+import com.example.retrofit.data.ai.model.toRequestBody
 import com.google.gson.Gson
 import java.io.IOException
 import javax.inject.Inject
@@ -29,7 +31,16 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
 
     override suspend fun getReply(message: Message): Message {
         return try {
-            api.generateContent(requestBody = message.toRequestBody()).toMessage()
+            api.generateContentOnSingleLine(requestBody = message.toRequestBody()).toMessage()
+        } catch (e: Exception) {
+            Message("error: ${e.localizedMessage}", Role.MODEL)
+        }
+    }
+
+    override suspend fun getReply(listMessage: List<Message>): Message {
+        val requestBody = RequestBody(listMessage.map { it.toContent() })
+        return try {
+            api.generateContentOnSingleLine(requestBody = requestBody).toMessage()
         } catch (e: Exception) {
             Message("error: ${e.localizedMessage}", Role.MODEL)
         }
@@ -71,10 +82,28 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
             emit(Message("Error: ${e.localizedMessage}", Role.MODEL))
         }
     }
+
+    override suspend fun getConversationTitle(content: String): String {
+        val message =
+            Message("naming the title of this conversation in one line: \"${content}\"", Role.USER)
+        return try {
+            api.generateContentOnSingleLine(requestBody = message.toRequestBody())
+                .toMessage()
+                .content
+                .trim()
+        } catch (e: Exception) {
+            print(e.localizedMessage)
+            "New Conversation"
+        }
+    }
 }
 
 class FakeRepository : AiRepository {
     override suspend fun getReply(message: Message): Message {
+        return Message("", Role.MODEL)
+    }
+
+    override suspend fun getReply(listMessage: List<Message>): Message {
         return Message("", Role.MODEL)
     }
 
@@ -84,5 +113,9 @@ class FakeRepository : AiRepository {
         emit(Message("..2..", Role.MODEL))
         delay(1000)
         emit(Message("..3", Role.MODEL))
+    }
+
+    override suspend fun getConversationTitle(content: String): String {
+        return "Title"
     }
 }
