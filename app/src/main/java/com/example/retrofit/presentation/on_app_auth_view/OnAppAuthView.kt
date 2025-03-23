@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
 import me.auth_android.auth_kit.presentation.views.account_view.AccountView
-import me.auth_android.auth_kit.presentation.views.on_app_auth_view.OnAppAuthView
+import me.auth_android.auth_kit.presentation.views.on_app_auth_view.AppReAuthView
 
 @Serializable
 private sealed interface OnAppAuthViewRoute {
@@ -27,6 +27,6 @@ fun OnAppAuthView(signOut: () -> Unit, onBack: () -> Unit) {
             )
         }
 
-        composable<OnAppAuthViewRoute.ReAuth> { OnAppAuthView { navController.navigateUp() } }
+        composable<OnAppAuthViewRoute.ReAuth> { AppReAuthView { navController.navigateUp() } }
     }
 }

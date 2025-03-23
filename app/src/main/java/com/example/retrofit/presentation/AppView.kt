@@ -91,18 +91,14 @@ fun AppView() {
         }
 
         composable<Route.AccountSetting>(enterTransition = enterPush, exitTransition = exitPush) {
-            Scaffold { padding ->
-                Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-                    OnAppAuthView(
-                        signOut = {
-                            navController.navigate(Route.Auth) {
-                                popUpTo<Route.AccountSetting> { inclusive = true }
-                            }
-                        },
-                        onBack = { navController.navigateUp() },
-                    )
-                }
-            }
+            OnAppAuthView(
+                signOut = {
+                    navController.navigate(Route.Auth) {
+                        popUpTo<Route.AccountSetting> { inclusive = true }
+                    }
+                },
+                onBack = { navController.navigateUp() },
+            )
         }
     }
 }
