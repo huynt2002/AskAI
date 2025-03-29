@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.list_view
+package com.example.retrofit.presentation.view.list_view
 
 import androidx.compose.runtime.Immutable
 import com.example.retrofit.presentation.model.ConversationUI

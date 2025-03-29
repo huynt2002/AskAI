@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.chat_view
+package com.example.retrofit.presentation.view.chat_view
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -6,11 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.retrofit.data.ai.AiRepository
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.data.ai.model.toMessageUI
-import com.example.retrofit.data.local_database.dao.ConversationDao
-import com.example.retrofit.data.local_database.dao.MessageDao
-import com.example.retrofit.data.local_database.model.ConversationEntity
-import com.example.retrofit.data.local_database.model.MessageEntity
-import com.example.retrofit.data.local_database.model.toMessageUI
+import com.example.retrofit.data.local_database.LocalDatabaseRepository
+import com.example.retrofit.data.local_database.database.model.ConversationEntity
+import com.example.retrofit.data.local_database.database.model.MessageEntity
+import com.example.retrofit.data.local_database.database.model.toMessageUI
 import com.example.retrofit.presentation.model.ConversationUI
 import com.example.retrofit.presentation.model.MessageUI
 import com.example.retrofit.presentation.model.toMessage
@@ -32,8 +31,7 @@ class ChatViewModel
 constructor(
     private val savedStateHandle: SavedStateHandle,
     private val aiRepository: AiRepository,
-    private val messageDao: MessageDao,
-    private val conversationDao: ConversationDao,
+    private val localDatabaseRepository: LocalDatabaseRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState())
     private var id = savedStateHandle["conversationId"] ?: ""
@@ -42,7 +40,9 @@ constructor(
             .onStart {
                 if (id.isNotBlank()) {
                     val list: List<MessageUI> =
-                        messageDao.getMessagesInConversation(id).map { it.toMessageUI() }
+                        localDatabaseRepository.getMessagesInConversation(id).map {
+                            it.toMessageUI()
+                        }
                     _uiState.update { state ->
                         state.copy(conversationUI = state.conversationUI.copy(listMessage = list))
                     }
@@ -115,7 +115,9 @@ constructor(
             if (id.isBlank()) {
                 id = UUID.randomUUID().toString()
                 val title = aiRepository.getConversationTitle(messageUI.content)
-                conversationDao.addNewConversation(ConversationEntity(id = id, title = title))
+                localDatabaseRepository.addNewConversation(
+                    ConversationEntity(id = id, title = title)
+                )
             }
             val messageEntity =
                 MessageEntity(
@@ -124,7 +126,7 @@ constructor(
                     id = UUID.randomUUID().toString(),
                     conversationId = id,
                 )
-            messageDao.insertMessage(messageEntity)
+            localDatabaseRepository.insertMessage(messageEntity)
         }
     }
 }

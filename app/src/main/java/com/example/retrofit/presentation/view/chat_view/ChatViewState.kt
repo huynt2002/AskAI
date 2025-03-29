@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.chat_view
+package com.example.retrofit.presentation.view.chat_view
 
 import androidx.compose.runtime.Stable
 import com.example.retrofit.presentation.model.ConversationUI

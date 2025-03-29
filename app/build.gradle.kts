@@ -79,6 +79,10 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     implementation("com.google.android.gms:play-services-ads:24.0.0")
+    
+    implementation(libs.androidx.adaptive)
+    implementation(libs.androidx.window.core)
+
 
 
     //Room

@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.setting_view
+package com.example.retrofit.presentation.view.setting_view
 sealed interface SettingViewAction {
     object AccountSetting : SettingViewAction
 }

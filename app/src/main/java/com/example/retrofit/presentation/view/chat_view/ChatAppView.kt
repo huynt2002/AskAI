@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.chat_view
+package com.example.retrofit.presentation.view.chat_view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,9 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.retrofit.R
-import com.example.retrofit.data.local_database.dao.FakeConversationDao
-import com.example.retrofit.data.local_database.dao.FakeMessageDao
 import com.example.retrofit.domain.impl.ai.FakeRepository
+import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,59 +50,54 @@ fun ChatView(
     val listState = rememberLazyListState()
 
     LaunchedEffect(uiState.conversationUI.listMessage.size) { listState.animateScrollToItem(0) }
-    Scaffold() { padding ->
-        Column(
-            modifier =
-                Modifier.padding(padding)
-                    .padding(horizontal = 12.dp)
-                    .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "")
+    Column(
+        modifier =
+            Modifier.padding(horizontal = 12.dp)
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "") }
+        }
+        Column(modifier = Modifier.imePadding()) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                reverseLayout = true,
+                state = listState,
+            ) {
+                items(items = uiState.conversationUI.listMessage.reversed(), key = { it.id }) {
+                    message ->
+                    MessageView(message.content, trailing = message.isUser)
                 }
             }
-            Column(modifier = Modifier.imePadding()) {
-                LazyColumn(
+
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.background)
+                        .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = uiState.text,
+                    onValueChange = { it -> viewModel.onTextChange(it) },
                     modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    reverseLayout = true,
-                    state = listState,
-                ) {
-                    items(items = uiState.conversationUI.listMessage.reversed(), key = { it.id }) {
-                        message ->
-                        MessageView(message.content, trailing = message.isUser)
-                    }
-                }
+                    singleLine = true,
+                )
 
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.background)
-                            .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = uiState.text,
-                        onValueChange = { it -> viewModel.onTextChange(it) },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                    )
-
-                    IconButton(onClick = viewModel::onClick, enabled = !uiState.isAiGenerating) {
-                        if (uiState.isAiGenerating) {
-                            CircularProgressIndicator()
-                        } else {
-                            Icon(
-                                painter = painterResource(R.drawable.baseline_send_24),
-                                "",
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
+                IconButton(onClick = viewModel::onClick, enabled = !uiState.isAiGenerating) {
+                    if (uiState.isAiGenerating) {
+                        CircularProgressIndicator()
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_send_24),
+                            "",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 }
             }
@@ -193,8 +186,7 @@ private fun Preview() {
         ChatViewModel(
             aiRepository = FakeRepository(),
             savedStateHandle = SavedStateHandle(),
-            messageDao = FakeMessageDao(),
-            conversationDao = FakeConversationDao(),
+            localDatabaseRepository = FakeLocalDatabaseImpl(),
         )
     ChatView(null, {}, viewModel)
 }

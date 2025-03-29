@@ -1,10 +1,10 @@
-package com.example.retrofit.data.local_database.dao
+package com.example.retrofit.data.local_database.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.retrofit.data.local_database.model.ConversationEntity
+import com.example.retrofit.data.local_database.database.model.ConversationEntity
 
 @Dao
 interface ConversationDao {
@@ -13,12 +13,4 @@ interface ConversationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addNewConversation(conversation: ConversationEntity)
-}
-
-class FakeConversationDao : ConversationDao {
-    override suspend fun getConversations(): List<ConversationEntity> {
-        return listOf()
-    }
-
-    override suspend fun addNewConversation(conversation: ConversationEntity) {}
 }

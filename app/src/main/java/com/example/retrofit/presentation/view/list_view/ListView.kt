@@ -1,4 +1,4 @@
-package com.example.retrofit.presentation.list_view
+package com.example.retrofit.presentation.view.list_view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +37,11 @@ import com.example.retrofit.ui.theme.RetrofitTheme
 import java.util.UUID
 
 @Composable
-fun ListView(toChatView: (String) -> Unit, viewModel: ListViewModel = hiltViewModel()) {
+fun ListView(
+    hasFab: Boolean = true,
+    toChatView: (String) -> Unit,
+    viewModel: ListViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -48,14 +52,14 @@ fun ListView(toChatView: (String) -> Unit, viewModel: ListViewModel = hiltViewMo
             }
         }
     }
-    ListScreen(state = state, onAction = viewModel::onAction)
+    ListScreen(hasFab = hasFab, state = state, onAction = viewModel::onAction)
     if (state.isLoading) {
         CircularProgressIndicator()
     }
 }
 
 @Composable
-fun ListScreen(state: ListViewState, onAction: (ListViewAction) -> Unit) {
+fun ListScreen(hasFab: Boolean = true, state: ListViewState, onAction: (ListViewAction) -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
@@ -79,11 +83,13 @@ fun ListScreen(state: ListViewState, onAction: (ListViewAction) -> Unit) {
                 }
             }
         }
-        FloatingActionButton(
-            modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
-            onClick = { onAction(ListViewAction.NewConversation) },
-        ) {
-            Icon(Icons.Default.Add, "")
+        if (hasFab) {
+            FloatingActionButton(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
+                onClick = { onAction(ListViewAction.NewConversation) },
+            ) {
+                Icon(Icons.Default.Add, "")
+            }
         }
     }
 }

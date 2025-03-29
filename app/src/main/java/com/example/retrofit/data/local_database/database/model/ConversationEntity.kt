@@ -1,4 +1,4 @@
-package com.example.retrofit.data.local_database.model
+package com.example.retrofit.data.local_database.database.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
