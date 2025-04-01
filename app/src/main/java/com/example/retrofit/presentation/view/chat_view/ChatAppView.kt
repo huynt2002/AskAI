@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -34,8 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.retrofit.R
 import com.example.retrofit.domain.impl.ai.FakeRepository
 import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
+import com.example.retrofit.presentation.model.toMessageViewType
 import me.huynt204567.android_ui_kit.MessageConfig
-import me.huynt204567.android_ui_kit.MessageType
 import me.huynt204567.android_ui_kit.MessageView
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +71,7 @@ fun ChatView(
                     val trailing = message.isUser
 
                     MessageView(
-                        messageType = MessageType.Text(content = message.content),
+                        messageType = message.messageUIType.toMessageViewType(),
                         messageConfig = MessageConfig(trailing = trailing, userAvatar = null),
                     )
                 }

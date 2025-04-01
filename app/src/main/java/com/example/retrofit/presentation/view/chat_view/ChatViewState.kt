@@ -7,6 +7,7 @@ import java.util.UUID
 @Stable
 data class ViewState(
     val text: String = "",
+    val base64Image: String = "",
     val isAiGenerating: Boolean = false,
     val conversationUI: ConversationUI =
         ConversationUI(id = UUID.randomUUID().toString(), "", listOf()),

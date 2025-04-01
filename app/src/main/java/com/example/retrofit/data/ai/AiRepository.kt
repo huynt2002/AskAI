@@ -1,14 +1,14 @@
 package com.example.retrofit.data.ai
 
-import com.example.retrofit.data.ai.model.Message
+import com.example.retrofit.data.ai.model.MessageModel
 import kotlinx.coroutines.flow.Flow
 
 interface AiRepository {
-    suspend fun getReply(message: Message): Message
+    suspend fun getReply(messageModel: MessageModel): MessageModel
 
-    suspend fun getReply(listMessage: List<Message>):Message
+    suspend fun getReply(listMessageModel: List<MessageModel>):MessageModel
 
-    fun getStreamReply(message: Message): Flow<Message>
+    fun getStreamReply(messageModel: MessageModel): Flow<MessageModel>
 
     suspend fun getConversationTitle(content: String): String
 }
