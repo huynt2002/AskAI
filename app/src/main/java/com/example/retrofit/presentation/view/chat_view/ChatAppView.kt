@@ -34,9 +34,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.retrofit.R
 import com.example.retrofit.domain.impl.ai.FakeRepository
 import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
-import me.huynt204567.ui_kit.MessageConfig
-import me.huynt204567.ui_kit.MessageType
-import me.huynt204567.ui_kit.MessageView
+import me.huynt204567.android_ui_kit.MessageConfig
+import me.huynt204567.android_ui_kit.MessageType
+import me.huynt204567.android_ui_kit.MessageView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
