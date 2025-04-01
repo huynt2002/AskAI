@@ -1,3 +1,6 @@
 [submodule "auth_android"]
 	path = auth_android
 	url = https://github.com/huynt2002/auth_android.git
+[submodule "android_ui_kit"]
+    path = android_ui_kit
+    url = https://github.com/huynt2002/android_ui_kit.git
