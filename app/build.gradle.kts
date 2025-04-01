@@ -31,8 +31,8 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "API_KEY", "\"AIzaSyC412ZiWf7JUwQ4fLChYUPri_lkcg9dvWY\"")
-            buildConfigField("String", "WEB_CLIENT_KEY", "\"443846272054-mcv7pg22bbmut0c871vrgohbjpjq24dj.apps.googleusercontent.com\"")
+            buildConfigField("String", "API_KEY", "")
+            buildConfigField("String", "WEB_CLIENT_KEY", "")
         }
     }
     compileOptions {
