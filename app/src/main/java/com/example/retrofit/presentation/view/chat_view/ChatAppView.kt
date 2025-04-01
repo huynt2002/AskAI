@@ -2,20 +2,16 @@ package com.example.retrofit.presentation.view.chat_view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +34,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.retrofit.R
 import com.example.retrofit.domain.impl.ai.FakeRepository
 import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
+import me.huynt204567.ui_kit.MessageConfig
+import me.huynt204567.ui_kit.MessageType
+import me.huynt204567.ui_kit.MessageView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +69,12 @@ fun ChatView(
             ) {
                 items(items = uiState.conversationUI.listMessage.reversed(), key = { it.id }) {
                     message ->
-                    MessageView(message.content, trailing = message.isUser)
+                    val trailing = message.isUser
+
+                    MessageView(
+                        messageType = MessageType.Text(content = message.content),
+                        messageConfig = MessageConfig(trailing = trailing, userAvatar = null),
+                    )
                 }
             }
 
@@ -100,80 +104,6 @@ fun ChatView(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun MessageView(message: String, trailing: Boolean = false, modifier: Modifier = Modifier) {
-    val messageContent: @Composable () -> Unit = {
-        val textColor =
-            if (!trailing) MaterialTheme.colorScheme.onSecondary
-            else MaterialTheme.colorScheme.onPrimary
-        val backgroundColor =
-            if (!trailing) MaterialTheme.colorScheme.secondary
-            else MaterialTheme.colorScheme.primary
-        val backgroundShape =
-            if (!trailing)
-                RoundedCornerShape(
-                    bottomStart = 8.dp,
-                    bottomEnd = 8.dp,
-                    topStart = 0.dp,
-                    topEnd = 8.dp,
-                )
-            else
-                RoundedCornerShape(
-                    bottomStart = 8.dp,
-                    bottomEnd = 8.dp,
-                    topStart = 8.dp,
-                    topEnd = 0.dp,
-                )
-        Box(
-            modifier =
-                Modifier.background(color = backgroundColor, shape = backgroundShape)
-                    .padding(12.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = message, color = textColor)
-        }
-    }
-    val messageBody: @Composable () -> Unit = {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment =
-                if (!trailing) {
-                    Alignment.Start
-                } else {
-                    Alignment.End
-                },
-        ) {
-            messageContent()
-        }
-    }
-
-    Box(modifier = modifier) {
-        val messagePadding: PaddingValues =
-            if (!trailing) {
-                PaddingValues(start = 0.dp, end = 32.dp, top = 4.dp, bottom = 4.dp)
-            } else {
-                PaddingValues(start = 32.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
-            }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(messagePadding),
-            horizontalArrangement =
-                if (!trailing) {
-                    Arrangement.Start
-                } else {
-                    Arrangement.End
-                },
-        ) {
-            if (!trailing) {
-                Spacer(Modifier.width(8.dp))
-                Box(modifier = Modifier.weight(1f)) { messageBody() }
-            } else {
-                Box(modifier = Modifier.weight(1f)) { messageBody() }
-                Spacer(Modifier.width(8.dp))
             }
         }
     }
