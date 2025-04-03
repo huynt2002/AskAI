@@ -1,9 +1,13 @@
 package com.example.retrofit.presentation.view.chat_view
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.retrofit.data.ai.AiRepository
+import com.example.retrofit.data.ai.model.MessageModel
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.data.ai.model.toMessageUI
 import com.example.retrofit.data.local_database.LocalDatabaseRepository
@@ -12,8 +16,8 @@ import com.example.retrofit.data.local_database.database.model.MessageEntity
 import com.example.retrofit.data.local_database.database.model.toMessageUI
 import com.example.retrofit.presentation.model.ConversationUI
 import com.example.retrofit.presentation.model.MessageUI
-import com.example.retrofit.presentation.model.MessageUIType
-import com.example.retrofit.presentation.model.toMessageModel
+import com.example.retrofit.util.ImageBase64Converter
+import com.example.retrofit.util.ImageFileSaver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
@@ -42,8 +46,8 @@ constructor(
             .onStart {
                 if (id.isNotBlank()) {
                     val list: List<MessageUI> =
-                        localDatabaseRepository.getMessagesInConversation(id).map {
-                            it.toMessageUI()
+                        localDatabaseRepository.getMessagesInConversation(id).map { entity ->
+                            entity.toMessageUI()
                         }
                     _uiState.update { state ->
                         state.copy(conversationUI = state.conversationUI.copy(listMessage = list))
@@ -60,25 +64,26 @@ constructor(
         _uiState.update { it.copy(text = text) }
     }
 
-    fun onImageSelect(base64String: String) {
-        _uiState.update { it.copy(base64Image = base64String) }
+    fun onImageSelect(uri: Uri?) {
+        _uiState.update { it.copy(imageUri = uri) }
     }
 
-    fun onClick() {
-        if (_uiState.value.text.trim().isBlank()) {
+    fun onReceiveUri(uri: Uri?) {
+        if (uri != null) {
+            onImageSelect(uri)
+        } else {
+            Log.d("PhotoPicker", "No media selected")
+        }
+    }
+
+    fun onClick(context: Context) {
+        val text = _uiState.value.text.trim()
+        if (text.isBlank() && _uiState.value.imageUri == null) {
             return
         }
 
         val sendMessage =
-            MessageUI(
-                messageUIType =
-                    if (_uiState.value.base64Image.isBlank()) {
-                        MessageUIType.Text(_uiState.value.text)
-                    } else {
-                        MessageUIType.Image(_uiState.value.text, _uiState.value.base64Image)
-                    },
-                isUser = true,
-            )
+            MessageUI(text = text, imageUri = _uiState.value.imageUri, user = Role.USER)
 
         _uiState.update {
             it.copy(
@@ -92,20 +97,38 @@ constructor(
         }
 
         onTextChange("")
-        onImageSelect("")
+        onImageSelect(null)
 
         _uiState.update { it.copy(isAiGenerating = true) }
         viewModelScope.launch {
-            launch(Dispatchers.IO) { addMessageToLocalDatabase(sendMessage) }
+            launch { addMessageToLocalDatabase(context, sendMessage) }
 
             val messageJob =
                 async(Dispatchers.IO) {
                     aiRepository.getReply(
-                        _uiState.value.conversationUI.listMessage.map { it.toMessageModel() }
+                        _uiState.value.conversationUI.listMessage.map { messageUI ->
+                            val base64String =
+                                messageUI.imageUri?.let {
+                                    async {
+                                            ImageBase64Converter.imageUriToBase64(
+                                                context,
+                                                messageUI.imageUri,
+                                            )
+                                        }
+                                        .await()
+                                }
+
+                            MessageModel(
+                                text = messageUI.text,
+                                imageBase64String = base64String,
+                                user = messageUI.user,
+                            )
+                        }
                     )
                 }
 
             val messageUI = messageJob.await().toMessageUI()
+            launch { addMessageToLocalDatabase(context, messageUI) }
 
             _uiState.update {
                 it.copy(
@@ -115,42 +138,26 @@ constructor(
                         )
                 )
             }
-
-            launch(Dispatchers.IO) { addMessageToLocalDatabase(messageUI) }
-
             _uiState.update { it.copy(isAiGenerating = false) }
         }
     }
 
-    suspend fun addMessageToLocalDatabase(messageUI: MessageUI) {
+    suspend fun addMessageToLocalDatabase(context: Context, messageUI: MessageUI) {
+        val content = messageUI.text
         if (id.isBlank()) {
             id = UUID.randomUUID().toString()
-            val content =
-                when (messageUI.messageUIType) {
-                    is MessageUIType.Image -> messageUI.messageUIType.content
-                    is MessageUIType.Text -> messageUI.messageUIType.content
-                }
+
             val title = aiRepository.getConversationTitle(content)
             localDatabaseRepository.addNewConversation(ConversationEntity(id = id, title = title))
         }
-        val content =
-            when (messageUI.messageUIType) {
-                is MessageUIType.Text -> messageUI.messageUIType.content
-                is MessageUIType.Image -> messageUI.messageUIType.base64ImageString
-            }
 
-        if (content.isBlank()) {
-            return
-        }
+        val imagePath = ImageFileSaver.saveImageUriToStorage(context, messageUI.imageUri) ?: ""
 
         val messageEntity =
             MessageEntity(
                 content = content,
-                imageString =
-                    if (messageUI.messageUIType is MessageUIType.Image)
-                        messageUI.messageUIType.base64ImageString
-                    else "",
-                role = (if (messageUI.isUser) Role.USER else Role.MODEL),
+                imagePath = imagePath,
+                role = messageUI.user,
                 id = UUID.randomUUID().toString(),
                 conversationId = id,
             )

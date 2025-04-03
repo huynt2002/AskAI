@@ -4,7 +4,6 @@ import com.example.retrofit.BuildConfig
 import com.example.retrofit.data.ai.AiAPI
 import com.example.retrofit.data.ai.AiRepository
 import com.example.retrofit.data.ai.model.MessageModel
-import com.example.retrofit.data.ai.model.MessageModelType
 import com.example.retrofit.data.ai.model.RequestBody
 import com.example.retrofit.data.ai.model.ResponseBody
 import com.example.retrofit.data.ai.model.Role
@@ -12,11 +11,11 @@ import com.example.retrofit.data.ai.model.toContent
 import com.example.retrofit.data.ai.model.toMessageModel
 import com.example.retrofit.data.ai.model.toRequestBody
 import com.google.gson.Gson
-import kotlinx.coroutines.CancellationException
 import java.io.IOException
 import javax.inject.Inject
 import kotlin.text.removePrefix
 import kotlin.text.startsWith
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaType
@@ -32,10 +31,11 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
 
     override suspend fun getReply(messageModel: MessageModel): MessageModel {
         return try {
-            api.generateContentOnSingleLine(requestBody = messageModel.toRequestBody()).toMessageModel()
+            api.generateContentOnSingleLine(requestBody = messageModel.toRequestBody())
+                .toMessageModel()
         } catch (e: Exception) {
-            if(e is CancellationException) throw e
-            MessageModel(MessageModelType.Text("error: ${e.localizedMessage}"), Role.MODEL)
+            if (e is CancellationException) throw e
+            MessageModel(text = "error: ${e.localizedMessage}", user = Role.MODEL)
         }
     }
 
@@ -44,8 +44,8 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
         return try {
             api.generateContentOnSingleLine(requestBody = requestBody).toMessageModel()
         } catch (e: Exception) {
-            if(e is CancellationException) throw e
-            MessageModel(MessageModelType.Text("error: ${e.localizedMessage}"), Role.MODEL)
+            if (e is CancellationException) throw e
+            MessageModel(text = "error: ${e.localizedMessage}", user = Role.MODEL)
         }
     }
 
@@ -82,27 +82,26 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
                 }
             }
         } catch (e: Exception) {
-            if(e is CancellationException) throw e
-            emit(MessageModel(MessageModelType.Text("Error: ${e.localizedMessage}"), Role.MODEL))
+            if (e is CancellationException) throw e
+            emit(MessageModel(text = "error: ${e.localizedMessage}", user = Role.MODEL))
         }
     }
 
     override suspend fun getConversationTitle(content: String): String {
         val messageModel =
             MessageModel(
-                MessageModelType.Text(
-                    "naming the title of this conversation in one line: \"${content}\""
-                ),
-                Role.USER,
+                text = "naming the title of this conversation in one line: \"${content}\"",
+                user = Role.USER,
             )
         return try {
             val title =
                 api.generateContentOnSingleLine(requestBody = messageModel.toRequestBody())
                     .toMessageModel()
-                    .messageType as MessageModelType.Text
-            title.content.trim()
+                    .text
+
+            title.trim()
         } catch (e: Exception) {
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
             print(e.localizedMessage)
             "New Conversation"
         }
@@ -111,15 +110,15 @@ constructor(private val api: AiAPI, private val okHttpClient: OkHttpClient) : Ai
 
 class FakeRepository : AiRepository {
     override suspend fun getReply(messageModel: MessageModel): MessageModel {
-        return MessageModel(MessageModelType.Text(""), Role.MODEL)
+        return MessageModel(text = "", user = Role.MODEL)
     }
 
     override suspend fun getReply(listMessageModel: List<MessageModel>): MessageModel {
-        return MessageModel(MessageModelType.Text(""), Role.MODEL)
+        return MessageModel(text = "", user = Role.MODEL)
     }
 
     override fun getStreamReply(messageModel: MessageModel): Flow<MessageModel> = flow {
-        emit(MessageModel(MessageModelType.Text("1.."), Role.MODEL))
+        emit(MessageModel(text = "", user = Role.MODEL))
     }
 
     override suspend fun getConversationTitle(content: String): String {

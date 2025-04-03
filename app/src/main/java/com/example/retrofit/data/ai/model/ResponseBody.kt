@@ -6,5 +6,5 @@ data class ResponseBody(@SerializedName("candidates") val candidates: List<Candi
 
 fun ResponseBody.toMessageModel(): MessageModel {
     return this.candidates.firstOrNull()?.content?.toMessageModel()
-        ?: MessageModel(MessageModelType.Text("error!"), Role.MODEL)
+        ?: MessageModel(text = "error!", user = Role.MODEL)
 }

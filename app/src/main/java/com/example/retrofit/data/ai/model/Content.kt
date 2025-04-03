@@ -15,9 +15,5 @@ fun Content.toMessageModel(): MessageModel {
             else -> Role.MODEL
         }
 
-    return MessageModel(
-        messageType = MessageModelType.Text(this.parts.firstOrNull()?.text ?: "..."),
-        isUser = user,
-    )
+    return MessageModel(text = this.parts.firstOrNull()?.text ?: "...", user = user)
 }
-

@@ -89,6 +89,9 @@ dependencies {
   implementation(libs.androidx.adaptive)
   implementation(libs.androidx.window.core)
 
+  implementation(libs.coil.compose)
+  implementation(libs.coil.network.okhttp)
+
   // Room
   val room_version = "2.6.1"
   implementation("androidx.room:room-runtime:$room_version")

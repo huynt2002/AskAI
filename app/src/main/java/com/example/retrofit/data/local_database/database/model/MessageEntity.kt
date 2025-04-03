@@ -6,7 +6,6 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.presentation.model.MessageUI
-import com.example.retrofit.presentation.model.MessageUIType
 
 @Entity(
     tableName = "message",
@@ -22,7 +21,7 @@ import com.example.retrofit.presentation.model.MessageUIType
 )
 data class MessageEntity(
     val content: String,
-    val imageString: String,
+    val imagePath: String,
     val role: Role,
     @ColumnInfo("time_stamp") val timeStamp: Long = System.currentTimeMillis(),
     @PrimaryKey val id: String, // Manually assigned String ID
@@ -30,14 +29,6 @@ data class MessageEntity(
 )
 
 fun MessageEntity.toMessageUI(): MessageUI {
-    return MessageUI(
-        id = this.id,
-        messageUIType =
-            if (this.imageString.isBlank()) {
-                MessageUIType.Text(this.content)
-            } else {
-                MessageUIType.Image(this.content, this.imageString)
-            },
-        isUser = this.role == Role.USER,
-    )
+    val imagePath = if (this.imagePath.isBlank()) null else this.imagePath
+    return MessageUI(text = this.content, imageUrl = imagePath, user = this.role)
 }
