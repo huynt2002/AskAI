@@ -46,7 +46,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.example.retrofit.R
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.domain.impl.ai.FakeRepository
-import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
+import com.example.retrofit.domain.impl.remote.remote_database.FakeRemoteDatabase
 import me.huynt204567.android_ui_kit.MessageConfig
 import me.huynt204567.android_ui_kit.MessageType
 import me.huynt204567.android_ui_kit.MessageView
@@ -209,7 +209,8 @@ private fun Preview() {
         ChatViewModel(
             aiRepository = FakeRepository(),
             savedStateHandle = SavedStateHandle(),
-            localDatabaseRepository = FakeLocalDatabaseImpl(),
+            //localDatabaseRepository = FakeLocalDatabaseImpl(),
+            remoteDatabaseRepository = FakeRemoteDatabase(),
         )
     ChatView(null, {}, viewModel)
 }

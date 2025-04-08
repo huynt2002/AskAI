@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,13 +19,14 @@ import me.rolingo.core.ui.animation.exitPop
 import me.rolingo.core.ui.animation.exitPush
 
 @Composable
-fun AppView() {
+fun AppView(appViewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val appName = stringResource(R.string.app_name)
     val appImage = painterResource(R.drawable.outline_question_answer_24)
     NavHost(navController = navController, startDestination = Route.Auth) {
         composable<Route.Auth> {
             AuthView(appName = appName, appImage = appImage) {
+                appViewModel.saveUser()
                 navController.navigate(Route.MainApp) { popUpTo<Route.Auth> { inclusive = true } }
             }
         }

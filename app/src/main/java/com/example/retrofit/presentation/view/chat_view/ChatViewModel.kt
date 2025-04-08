@@ -10,16 +10,15 @@ import com.example.retrofit.data.ai.AiRepository
 import com.example.retrofit.data.ai.model.MessageModel
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.data.ai.model.toMessageUI
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
-import com.example.retrofit.data.local_database.database.model.ConversationEntity
-import com.example.retrofit.data.local_database.database.model.MessageEntity
-import com.example.retrofit.data.local_database.database.model.toMessageUI
+import com.example.retrofit.data.remote_database.RemoteDatabaseRepository
+import com.example.retrofit.data.remote_database.model.ConversationRequest
+import com.example.retrofit.data.remote_database.model.MessageRequest
+import com.example.retrofit.data.remote_database.model.toMessageUI
 import com.example.retrofit.presentation.model.ConversationUI
 import com.example.retrofit.presentation.model.MessageUI
 import com.example.retrofit.util.ImageBase64Converter
 import com.example.retrofit.util.ImageFileSaver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.collections.plus
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +36,8 @@ class ChatViewModel
 constructor(
     private val savedStateHandle: SavedStateHandle,
     private val aiRepository: AiRepository,
-    private val localDatabaseRepository: LocalDatabaseRepository,
+    // private val localDatabaseRepository: LocalDatabaseRepository,
+    private val remoteDatabaseRepository: RemoteDatabaseRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState())
     private var id = savedStateHandle["conversationId"] ?: ""
@@ -46,9 +46,10 @@ constructor(
             .onStart {
                 if (id.isNotBlank()) {
                     val list: List<MessageUI> =
-                        localDatabaseRepository.getMessagesInConversation(id).map { entity ->
-                            entity.toMessageUI()
-                        }
+                        // localDatabaseRepository.getMessagesInConversation(id).map { entity ->
+                        //                                                    entity.toMessageUI()
+                        //                                                }
+                        remoteDatabaseRepository.getMessages(id).map { it.toMessageUI() }
                     _uiState.update { state ->
                         state.copy(conversationUI = state.conversationUI.copy(listMessage = list))
                     }
@@ -144,23 +145,33 @@ constructor(
 
     suspend fun addMessageToLocalDatabase(context: Context, messageUI: MessageUI) {
         val content = messageUI.text
-        if (id.isBlank()) {
-            id = UUID.randomUUID().toString()
-
-            val title = aiRepository.getConversationTitle(content)
-            localDatabaseRepository.addNewConversation(ConversationEntity(id = id, title = title))
-        }
+        val conversationId =
+            if (id.isBlank()) {
+                val title = aiRepository.getConversationTitle(content)
+                remoteDatabaseRepository
+                    .addConversation(ConversationRequest(null, title = title))
+                    .id
+                //   localDatabaseRepository.addNewConversation(ConversationEntity(id = id, title =
+                // title))
+            } else id
 
         val imagePath = ImageFileSaver.saveImageUriToStorage(context, messageUI.imageUri) ?: ""
 
-        val messageEntity =
-            MessageEntity(
-                content = content,
-                imagePath = imagePath,
-                role = messageUI.user,
-                id = UUID.randomUUID().toString(),
-                conversationId = id,
-            )
-        localDatabaseRepository.insertMessage(messageEntity)
+        val role =
+            when (messageUI.user) {
+                Role.MODEL -> "model"
+                Role.USER -> "user"
+            }
+        remoteDatabaseRepository.addMessage(
+            conversationId = conversationId,
+            MessageRequest(content = messageUI.text, imagePath = "", role = role),
+        )
+        // localDatabaseRepository.insertMessage(MessageEntity(
+        //                content = content,
+        //                imagePath = imagePath,
+        //                role = messageUI.user,
+        //                id = UUID.randomUUID().toString(),
+        //                conversationId = id,
+        //            ))
     }
 }

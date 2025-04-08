@@ -2,8 +2,9 @@ package com.example.retrofit.presentation.view.list_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
 import com.example.retrofit.data.local_database.database.model.toConversationUI
+import com.example.retrofit.data.remote_database.model.toConversationUI
+import com.example.retrofit.domain.impl.remote.remote_database.RemoteDatabaseImpl
 import com.example.retrofit.presentation.model.ConversationUI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -19,14 +20,19 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ListViewModel
 @Inject
-constructor(private val localDatabaseRepository: LocalDatabaseRepository) : ViewModel() {
+constructor(
+    //   private val localDatabaseRepository: LocalDatabaseRepository,
+    private val remoteDatabaseImpl: RemoteDatabaseImpl
+) : ViewModel() {
     private val _state = MutableStateFlow(ListViewState())
     val state =
         _state
             .onStart {
                 _state.update { it.copy(isLoading = true) }
                 val conversationList: List<ConversationUI> =
-                    localDatabaseRepository.getConversations().map { it.toConversationUI() }
+                    //                    localDatabaseRepository.getConversations().map {
+                    // it.toConversationUI() }
+                    remoteDatabaseImpl.getConversations().map { it.toConversationUI() }
                 _state.update { ListViewState(conversationList, isLoading = false) }
             }
             .stateIn(
