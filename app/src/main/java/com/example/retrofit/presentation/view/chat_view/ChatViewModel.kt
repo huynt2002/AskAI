@@ -151,7 +151,7 @@ constructor(
             localDatabaseRepository.addNewConversation(ConversationEntity(id = id, title = title))
         }
 
-        val imagePath = ImageFileSaver.saveImageUriToStorage(context, messageUI.imageUri) ?: ""
+        val imagePath = ImageFileSaver.getSavedImageUriStoragePath(context, messageUI.imageUri) ?: ""
 
         val messageEntity =
             MessageEntity(

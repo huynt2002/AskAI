@@ -2,13 +2,14 @@ package com.example.retrofit.util
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object ImageFileSaver {
-    suspend fun saveImageUriToStorage(context: Context, uri: Uri?): String? {
+    suspend fun getSavedImageUriStoragePath(context: Context, uri: Uri?): String? {
         if (uri == null) {
             return null
         }
@@ -16,7 +17,11 @@ object ImageFileSaver {
             val inputStream =
                 context.contentResolver.openInputStream(uri) ?: return@withContext null
 
-            val directory = File(context.filesDir, "images") // Internal storage directory
+            val directory =
+                File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                    "images",
+                )
             if (!directory.exists()) {
                 directory.mkdirs()
             }
