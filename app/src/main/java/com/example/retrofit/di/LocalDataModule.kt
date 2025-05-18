@@ -2,9 +2,9 @@ package com.example.retrofit.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
+import com.example.retrofit.domain.repository.local_database.LocalDatabaseRepository
 import com.example.retrofit.data.local_database.database.Database
-import com.example.retrofit.domain.impl.local_database.LocalDatabaseImpl
+import com.example.retrofit.data.local_database.LocalDatabaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

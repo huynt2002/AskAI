@@ -2,7 +2,7 @@ package com.example.retrofit.presentation.view.list_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
+import com.example.retrofit.domain.repository.local_database.LocalDatabaseRepository
 import com.example.retrofit.data.local_database.database.model.toConversationUI
 import com.example.retrofit.presentation.model.ConversationUI
 import dagger.hilt.android.lifecycle.HiltViewModel

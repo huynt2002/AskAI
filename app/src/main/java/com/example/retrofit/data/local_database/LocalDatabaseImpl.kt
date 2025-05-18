@@ -1,6 +1,6 @@
-package com.example.retrofit.domain.impl.local_database
+package com.example.retrofit.data.local_database
 
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
+import com.example.retrofit.domain.repository.local_database.LocalDatabaseRepository
 import com.example.retrofit.data.local_database.database.dao.ConversationDao
 import com.example.retrofit.data.local_database.database.dao.MessageDao
 import com.example.retrofit.data.local_database.database.model.ConversationEntity

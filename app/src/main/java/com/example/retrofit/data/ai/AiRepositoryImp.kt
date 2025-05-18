@@ -1,8 +1,6 @@
-package com.example.retrofit.domain.impl.ai
+package com.example.retrofit.data.ai
 
 import com.example.retrofit.BuildConfig
-import com.example.retrofit.data.ai.AiAPI
-import com.example.retrofit.data.ai.AiRepository
 import com.example.retrofit.data.ai.model.MessageModel
 import com.example.retrofit.data.ai.model.RequestBody
 import com.example.retrofit.data.ai.model.ResponseBody
@@ -10,6 +8,7 @@ import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.data.ai.model.toContent
 import com.example.retrofit.data.ai.model.toMessageModel
 import com.example.retrofit.data.ai.model.toRequestBody
+import com.example.retrofit.domain.repository.ai.AiRepository
 import com.google.gson.Gson
 import java.io.IOException
 import javax.inject.Inject

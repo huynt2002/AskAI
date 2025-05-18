@@ -6,11 +6,11 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.retrofit.data.ai.AiRepository
+import com.example.retrofit.domain.repository.ai.AiRepository
 import com.example.retrofit.data.ai.model.MessageModel
 import com.example.retrofit.data.ai.model.Role
 import com.example.retrofit.data.ai.model.toMessageUI
-import com.example.retrofit.data.local_database.LocalDatabaseRepository
+import com.example.retrofit.domain.repository.local_database.LocalDatabaseRepository
 import com.example.retrofit.data.local_database.database.model.ConversationEntity
 import com.example.retrofit.data.local_database.database.model.MessageEntity
 import com.example.retrofit.data.local_database.database.model.toMessageUI

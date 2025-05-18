@@ -1,4 +1,4 @@
-package com.example.retrofit.data.local_database
+package com.example.retrofit.domain.repository.local_database
 
 import com.example.retrofit.data.local_database.database.model.ConversationEntity
 import com.example.retrofit.data.local_database.database.model.MessageEntity

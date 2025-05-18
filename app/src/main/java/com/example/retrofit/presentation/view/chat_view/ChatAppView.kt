@@ -45,8 +45,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import com.example.retrofit.R
 import com.example.retrofit.data.ai.model.Role
-import com.example.retrofit.domain.impl.ai.FakeRepository
-import com.example.retrofit.domain.impl.local_database.FakeLocalDatabaseImpl
+import com.example.retrofit.data.ai.FakeRepository
+import com.example.retrofit.data.local_database.FakeLocalDatabaseImpl
 import me.huynt204567.android_ui_kit.MessageConfig
 import me.huynt204567.android_ui_kit.MessageType
 import me.huynt204567.android_ui_kit.MessageView

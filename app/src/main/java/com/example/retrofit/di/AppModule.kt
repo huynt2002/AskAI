@@ -4,8 +4,8 @@ import android.content.Context
 import com.example.retrofit.BuildConfig
 import com.example.retrofit.R
 import com.example.retrofit.data.ai.AiAPI
-import com.example.retrofit.data.ai.AiRepository
-import com.example.retrofit.domain.impl.ai.AiRepositoryImp
+import com.example.retrofit.domain.repository.ai.AiRepository
+import com.example.retrofit.data.ai.AiRepositoryImp
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
