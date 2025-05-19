@@ -14,7 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import me.auth_android.auth_kit.data.auth.defines.Authenticating
-import me.auth_android.auth_kit.domain.firebase_auth.FirebaseAuthenticatingImp
+import me.auth_android.auth_kit.data.firebase_auth.FirebaseAuthenticatingImp
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
